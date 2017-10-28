@@ -58,24 +58,40 @@ int map_file(
         {
             perror("state/mode");
         }
-        
         return FILE_MAP_ERROR; // Return early with error
     }
 
-    // Extract the file length
-    map->length = sb.st_size;
-    if ( map->length == 0 ) // Ensure the file is not empty
+    // Ensure the file is not empty so it can be mapped
+    if ( sb.st_size == 0 )
     {
-        // Set the error code for upstream handling
-        if ( close( map->fid ) == -1 ) // Attempt to close the file
+        if ( map->length == 0 )
         {
-            perror("length/close");
+            // Set the error code for upstream handling
+            if ( close( map->fid ) == -1 ) // Attempt to close the file
+            {
+                perror("length/close");  
+            }
+            else
+            {
+                perror("length");
+            }
             return FILE_MAP_ERROR; // Return early with error
         }
-        else
+        else // Pad the file with zeros
         {
-            perror("length");
-            status = FILE_MAP_WARN;
+            if ( ftruncate( map->fid, map->length ) == -1 )
+            {
+                // Set the error code for upstream handling
+                if ( close( map->fid ) == -1 ) // Attempt to close the file
+                {
+                    perror("length/truncate/close");  
+                }
+                else
+                {
+                    perror("length/truncate");
+                }
+                return FILE_MAP_ERROR; // Return early with error
+            }
         }
     }
     
@@ -94,7 +110,6 @@ int map_file(
         {
             perror("prot");
         }
-        
         return FILE_MAP_ERROR; // Return early with error
     }
 
@@ -119,7 +134,6 @@ int map_file(
         {
             perror("access");
         }
-        
         return FILE_MAP_ERROR; // Return early with error
     }
 
@@ -143,7 +157,6 @@ int map_file(
         {
             perror("mmap");
         }
-        
         return FILE_MAP_ERROR; // Return early with error
     }
 
