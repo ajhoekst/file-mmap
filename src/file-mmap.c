@@ -20,8 +20,9 @@ int map_file(
 
     // Open the file for mapping
     map->fid = open(
-        filename,   // Filename to map and, consequently, from which to read
-        O_RDONLY    // We only need to read to map a file to memory
+        filename,           // Filename to map and, consequently, from which to read
+        O_RDWR | O_CREAT,   // We only need to read to map a file to memory
+        S_IRUSR	| S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
     );
     if ( map->fid < 0 ) // Negative return from open indicates an error
     {
