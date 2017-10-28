@@ -94,6 +94,10 @@ int map_file(
             }
         }
     }
+    else // Save file size as the map size
+    {
+        map->length = sb.st_size;
+    }
     
     // Extract map protections from mode
     int map_prot = 0x00;
